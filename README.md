@@ -1,3 +1,5 @@
+[![go report card](https://goreportcard.com/badge/github.com/zhupeijun/gorm-ext "go report card")](https://goreportcard.com/report/github.com/zhupeijun/gorm-ext)
+[![Run Tests](https://github.com/zhupeijun/gorm-ext/actions/workflows/gorm-ext.yml/badge.svg)](https://github.com/zhupeijun/gorm-ext/actions/workflows/gorm-ext.yml)
 [![GoDoc](https://godoc.org/github.com/zhupeijun/gorm-ext?status.svg)](https://godoc.org/github.com/zhupeijun/gorm-ext)
 
 # Audit
@@ -25,10 +27,10 @@ Embed `audit.Audit` for audit information and `tenant.Tenant` for tenant informa
 
 ```go
 type User struct {
-	gorm.Model
-	audit.Audit
-	tenant.Tenant
-	Name string
+    gorm.Model
+    audit.Audit
+    tenant.Tenant
+    Name string
 }
 ```
 

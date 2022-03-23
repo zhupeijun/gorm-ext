@@ -1,0 +1,35 @@
+name: Run Tests
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  tests:
+    strategy:
+      matrix:
+        go: [ '1.18', '1.17', '1.16' ]
+        platform: [ ubuntu-latest ] # can not run in windows OS
+    runs-on: ${{ matrix.platform }}
+
+    steps:
+      - name: Set up Go ${{ matrix.go }}
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go }}
+
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: go mod package cache
+        uses: actions/cache@v2
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ matrix.go }}-${{ hashFiles('tests/go.mod') }}
+
+      - name: Run Tests
+        run: go test ./...
