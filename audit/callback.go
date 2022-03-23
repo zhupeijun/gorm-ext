@@ -26,6 +26,7 @@ func assignCreatedBy(db *gorm.DB) {
 	if value, enabled := db.Statement.Model.(auditInterface); enabled {
 		if user, ok := getCurrentUser(db); ok {
 			value.SetCreatedBy(user)
+			value.SetUpdatedBy(user)
 		}
 	}
 }
