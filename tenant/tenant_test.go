@@ -11,7 +11,7 @@ import (
 )
 
 type User struct {
-	gorm.Model
+	ID uint `gorm:"primarykey"`
 	Tenant
 	Name string
 	Role string
@@ -42,23 +42,23 @@ func init() {
 func createUser() {
 	db.Unscoped().Where("1=1").Delete(&User{})
 
-	db.Set(ContextKeyTenantID, "tenant-1").Create(&User{Name: "Alice", Role: "admin"})
-	db.Set(ContextKeyTenantID, "tenant-2").Create(&User{Name: "Alice", Role: "admin"})
+	db.Set(ContextKeyTenantID, uint(1)).Create(&User{Name: "Alice", Role: "admin"})
+	db.Set(ContextKeyTenantID, uint(2)).Create(&User{Name: "Alice", Role: "admin"})
 
 }
 
 func TestUserCreateAndRead(t *testing.T) {
 	createUser()
 
-	tenant1DB := db.Set(ContextKeyTenantID, "tenant-1")
-	tenant2DB := db.Set(ContextKeyTenantID, "tenant-2")
+	tenant1DB := db.Set(ContextKeyTenantID, uint(1))
+	tenant2DB := db.Set(ContextKeyTenantID, uint(2))
 
 	var count int64
 
-	tenant1DB.Model(&User{}).Where("tenant_id", "tenant-1").Count(&count)
+	tenant1DB.Model(&User{}).Where("tenant_id", uint(1)).Count(&count)
 	assert.Equal(t, int64(1), count)
 
-	tenant2DB.Model(&User{}).Where("tenant_id", "tenant-2").Count(&count)
+	tenant2DB.Model(&User{}).Where("tenant_id", uint(2)).Count(&count)
 	assert.Equal(t, int64(1), count)
 }
 
@@ -66,8 +66,8 @@ func TestUserUpdate(t *testing.T) {
 	createUser()
 
 	var user1 User
-	tenant1DB := db.Set(ContextKeyTenantID, "tenant-1")
-	tenant2DB := db.Set(ContextKeyTenantID, "tenant-2")
+	tenant1DB := db.Set(ContextKeyTenantID, uint(1))
+	tenant2DB := db.Set(ContextKeyTenantID, uint(2))
 
 	tenant1DB.Model(&User{}).Where("name", "Alice").Update("role", "user")
 	tenant1DB.Where("name", "Alice").Find(&user1)
@@ -81,8 +81,8 @@ func TestUserUpdate(t *testing.T) {
 func TestUserDelete(t *testing.T) {
 	createUser()
 
-	tenant1DB := db.Set(ContextKeyTenantID, "tenant-1")
-	tenant2DB := db.Set(ContextKeyTenantID, "tenant-2")
+	tenant1DB := db.Set(ContextKeyTenantID, uint(1))
+	tenant2DB := db.Set(ContextKeyTenantID, uint(2))
 
 	tenant1DB.Where("name", "Alice").Delete(&User{})
 

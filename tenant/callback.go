@@ -1,25 +1,23 @@
 package tenant
 
 import (
-	"fmt"
-
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
 
 type tenantInterface interface {
-	SetTenantID(tenantID string)
-	GetTenantID() string
+	SetTenantID(tenantID uint)
+	GetTenantID() uint
 }
 
 var ContextKeyTenantID = "tenant:id"
 var DisableTenantScope = "tenant:disable"
 
-func getTenantID(db *gorm.DB) (string, bool) {
+func getTenantID(db *gorm.DB) (uint, bool) {
 	if tenantID, ok := db.Get(ContextKeyTenantID); ok {
-		return fmt.Sprint(tenantID), ok
+		return tenantID.(uint), ok
 	}
-	return "", false
+	return 0, false
 }
 
 func tryGetTenantModel(db *gorm.DB) (tenantInterface, bool) {

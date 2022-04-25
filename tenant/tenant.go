@@ -1,13 +1,13 @@
 package tenant
 
 type Tenant struct {
-	TenantID string
+	TenantID uint
 }
 
-func (model *Tenant) SetTenantID(tenantID string) {
+func (model *Tenant) SetTenantID(tenantID uint) {
 	model.TenantID = tenantID
 }
 
-func (model *Tenant) GetTenantID() string {
+func (model *Tenant) GetTenantID() uint {
 	return model.TenantID
 }
