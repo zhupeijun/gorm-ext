@@ -7,7 +7,3 @@ type Tenant struct {
 func (model *Tenant) SetTenantID(tenantID uint) {
 	model.TenantID = tenantID
 }
-
-func (model *Tenant) GetTenantID() uint {
-	return model.TenantID
-}

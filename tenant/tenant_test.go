@@ -101,3 +101,21 @@ func TestUserWithoutScope(t *testing.T) {
 	db.Set(DisableTenantScope, true).Model(&User{}).Count(&count)
 	assert.Equal(t, int64(2), count)
 }
+
+func TestUserWithDifferentModelType(t *testing.T) {
+	db.Unscoped().Where("1=1").Delete(&User{})
+	db.Set(ContextKeyTenantID, uint(1)).Create(&User{Name: "Alice", Role: "admin"})
+
+	tenantDB := db.Set(ContextKeyTenantID, uint(1))
+
+	var count int64
+	tenantDB.Model(User{}).Where("tenant_id", uint(1)).Count(&count)
+	assert.Equal(t, int64(1), count)
+
+	var array []User
+	tenantDB.Find(&array)
+	assert.Equal(t, 1, len(array))
+
+	tenantDB.Model([]User{}).Where("tenant_id", uint(1)).Count(&count)
+	assert.Equal(t, int64(1), count)
+}

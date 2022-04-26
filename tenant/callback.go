@@ -1,18 +1,20 @@
 package tenant
 
 import (
+	"reflect"
+
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
 
 type tenantInterface interface {
 	SetTenantID(tenantID uint)
-	GetTenantID() uint
 }
 
 var ContextKeyTenantID = "tenant:id"
 var DisableTenantScope = "tenant:disable"
 
+// getTenantID retrieve tenant id from context
 func getTenantID(db *gorm.DB) (uint, bool) {
 	if tenantID, ok := db.Get(ContextKeyTenantID); ok {
 		return tenantID.(uint), ok
@@ -20,22 +22,47 @@ func getTenantID(db *gorm.DB) (uint, bool) {
 	return 0, false
 }
 
-func tryGetTenantModel(db *gorm.DB) (tenantInterface, bool) {
-	value, enabled := db.Statement.Model.(tenantInterface)
-	return value, enabled
+// toPointer make a struct to pointer type
+func toPointer(v interface{}) interface{} {
+	if reflect.ValueOf(v).Kind() != reflect.Pointer {
+		p := reflect.New(reflect.TypeOf(v))
+		v = p.Interface()
+	}
+	return v
 }
 
+// isTargetModel any type of T, *T, []T, *[]T, *[]*T, T is type of tenantInterface
+func isTargetModel(db *gorm.DB) bool {
+	m := db.Statement.Model
+
+	// if not pointer change it to pointer
+	m = toPointer(m)
+
+	// if slice or array, retrieve the concrete type
+	if reflect.ValueOf(m).Elem().Kind() == reflect.Slice || reflect.ValueOf(m).Elem().Kind() == reflect.Array {
+		m = reflect.ValueOf(m).Elem().Interface()
+	}
+
+	// if not pointer, change it to pointer
+	m = toPointer(m)
+
+	_, ok := m.(tenantInterface)
+	return ok
+}
+
+// assignTenantID set tenant id to model, model need to be pointer
 func assignTenantID(db *gorm.DB) {
-	if value, enabled := db.Statement.Model.(tenantInterface); enabled {
+	if val, enabled := db.Statement.Model.(tenantInterface); enabled {
 		if tenantID, ok := getTenantID(db); ok {
-			value.SetTenantID(tenantID)
+			val.SetTenantID(tenantID)
 		}
 	}
 }
 
+// addWhereCondition append where condition
 func addWhereCondition(db *gorm.DB) {
 	if _, disabled := db.Get(DisableTenantScope); !disabled {
-		if _, ok := tryGetTenantModel(db); ok {
+		if ok := isTargetModel(db); ok {
 			if tenantID, ok := getTenantID(db); ok {
 				condition := db.Statement.BuildCondition("tenant_id", tenantID)
 				db.Statement.AddClause(clause.Where{Exprs: condition})
