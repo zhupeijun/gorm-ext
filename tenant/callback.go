@@ -22,15 +22,6 @@ func getTenantID(db *gorm.DB) (uint, bool) {
 	return 0, false
 }
 
-// toPointer make a struct to pointer type
-func toPointer(v interface{}) interface{} {
-	if reflect.ValueOf(v).Kind() != reflect.Pointer {
-		p := reflect.New(reflect.TypeOf(v))
-		v = p.Interface()
-	}
-	return v
-}
-
 // isTargetModel any type of T, *T, []T, *[]T, *[]*T, T is type of tenantInterface
 func isTargetModel(db *gorm.DB) bool {
 	_, ok := reflect.New(db.Statement.Schema.ModelType).Interface().(tenantInterface)
