@@ -69,13 +69,17 @@ type User struct {
 ### Usage
 
 ```go
-// setup the information to the db context
-tenant1DB := db.Set(ContextKeyTenantID, "tenant-1")
-tenant1DB.Create(&User{Name: "Alice", Role: "admin"})
-// INSERT INTO `users` (`created_at`,`updated_at`,`deleted_at`,`tenant_id`,`name`,`role`) VALUES ("...","...",NULL,"tenant-1","Alice","admin")
+db := db.Set(ContextKeyTenantID, uint(1))
 
-db.Set(DisableTenantScope, true).Model(&User{}).Count(&count)
-// SELECT count(*) FROM `users` WHERE `users`.`deleted_at` IS NULL
+db..Create(&User{Name: "Alice", Role: "admin"})
+// INSERT INTO `users` (`tenant_id`,`name`,`role`) VALUES (1,"Alice","admin") RETURNING `id`
+
+db.Model(&User{}).Where("name", "Alice").Update("role", "user")
+// UPDATE `users` SET `role`="user" WHERE `name` = "Alice" AND `tenant_id` = 1
+
+var users []User
+tenantDB.Find(&users)
+// SELECT * FROM `users` WHERE `name` = "Alice" AND `tenant_id` = 1
 ```
 
 ## License

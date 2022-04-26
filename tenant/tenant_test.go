@@ -55,10 +55,10 @@ func TestUserCreateAndRead(t *testing.T) {
 
 	var count int64
 
-	tenant1DB.Model(&User{}).Where("tenant_id", uint(1)).Count(&count)
+	tenant1DB.Model(&User{}).Count(&count)
 	assert.Equal(t, int64(1), count)
 
-	tenant2DB.Model(&User{}).Where("tenant_id", uint(2)).Count(&count)
+	tenant2DB.Model(&User{}).Count(&count)
 	assert.Equal(t, int64(1), count)
 }
 
@@ -102,20 +102,24 @@ func TestUserWithoutScope(t *testing.T) {
 	assert.Equal(t, int64(2), count)
 }
 
-func TestUserWithDifferentModelType(t *testing.T) {
-	db.Unscoped().Where("1=1").Delete(&User{})
-	db.Set(ContextKeyTenantID, uint(1)).Create(&User{Name: "Alice", Role: "admin"})
-
-	tenantDB := db.Set(ContextKeyTenantID, uint(1))
+func TestStructTypeModel(t *testing.T) {
+	createUser()
 
 	var count int64
-	tenantDB.Model(User{}).Where("tenant_id", uint(1)).Count(&count)
+	db.Set(ContextKeyTenantID, uint(1)).Model(User{}).Count(&count)
 	assert.Equal(t, int64(1), count)
+}
 
-	var array []User
-	tenantDB.Find(&array)
-	assert.Equal(t, 1, len(array))
+func TestSlicePointerTypeModel(t *testing.T) {
+	createUser()
 
-	tenantDB.Model([]User{}).Where("tenant_id", uint(1)).Count(&count)
+	var s []User
+	db.Set(ContextKeyTenantID, uint(1)).Find(&s)
+	assert.Equal(t, 1, len(s))
+}
+
+func TestSliceTypeModel(t *testing.T) {
+	var count int64
+	db.Set(ContextKeyTenantID, uint(1)).Model([]User{}).Count(&count)
 	assert.Equal(t, int64(1), count)
 }

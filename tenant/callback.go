@@ -33,20 +33,7 @@ func toPointer(v interface{}) interface{} {
 
 // isTargetModel any type of T, *T, []T, *[]T, *[]*T, T is type of tenantInterface
 func isTargetModel(db *gorm.DB) bool {
-	m := db.Statement.Model
-
-	// if not pointer change it to pointer
-	m = toPointer(m)
-
-	// if slice or array, retrieve the concrete type
-	if reflect.ValueOf(m).Elem().Kind() == reflect.Slice || reflect.ValueOf(m).Elem().Kind() == reflect.Array {
-		m = reflect.ValueOf(m).Elem().Interface()
-	}
-
-	// if not pointer, change it to pointer
-	m = toPointer(m)
-
-	_, ok := m.(tenantInterface)
+	_, ok := reflect.New(db.Statement.Schema.ModelType).Interface().(tenantInterface)
 	return ok
 }
 
