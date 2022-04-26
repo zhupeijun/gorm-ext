@@ -71,14 +71,14 @@ type User struct {
 ```go
 db := db.Set(ContextKeyTenantID, uint(1))
 
-db..Create(&User{Name: "Alice", Role: "admin"})
+db.Create(&User{Name: "Alice", Role: "admin"})
 // INSERT INTO `users` (`tenant_id`,`name`,`role`) VALUES (1,"Alice","admin") RETURNING `id`
 
 db.Model(&User{}).Where("name", "Alice").Update("role", "user")
 // UPDATE `users` SET `role`="user" WHERE `name` = "Alice" AND `tenant_id` = 1
 
 var users []User
-tenantDB.Find(&users)
+db.Find(&users)
 // SELECT * FROM `users` WHERE `name` = "Alice" AND `tenant_id` = 1
 ```
 
