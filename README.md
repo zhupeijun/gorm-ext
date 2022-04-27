@@ -1,5 +1,6 @@
 [![go report card](https://goreportcard.com/badge/github.com/zhupeijun/gorm-ext "go report card")](https://goreportcard.com/report/github.com/zhupeijun/gorm-ext)
 [![Run Tests](https://github.com/zhupeijun/gorm-ext/actions/workflows/gorm-ext.yml/badge.svg)](https://github.com/zhupeijun/gorm-ext/actions/workflows/gorm-ext.yml)
+[![codecov](https://codecov.io/gh/zhupeijun/gorm-ext/branch/master/graph/badge.svg?token=IV057761SV)](https://codecov.io/gh/zhupeijun/gorm-ext)
 [![GoDoc](https://godoc.org/github.com/zhupeijun/gorm-ext?status.svg)](https://godoc.org/github.com/zhupeijun/gorm-ext)
 
 # Audit
