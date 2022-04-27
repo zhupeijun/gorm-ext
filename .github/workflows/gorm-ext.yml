@@ -32,4 +32,9 @@ jobs:
           key: ${{ runner.os }}-go-${{ matrix.go }}-${{ hashFiles('tests/go.mod') }}
 
       - name: Run Tests
-        run: go test ./...
+        run: go test --coverprofile=coverage.coverprofile --covermode=atomic ./...
+
+      - name: Upload Coverage
+        uses: codecov/codecov-action@v3
+        with:
+          flags: ${{ matrix.os }},go-${{ matrix.go }},${{ matrix.test-tags }}
