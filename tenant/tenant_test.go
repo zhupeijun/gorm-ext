@@ -12,7 +12,7 @@ import (
 
 type User struct {
 	ID uint `gorm:"primarykey"`
-	Tenant
+	TenantModel
 	Name string
 	Role string
 }
