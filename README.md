@@ -61,7 +61,7 @@ Embed `audit.Audit` for audit information.
 ```go
 type User struct {
     gorm.Model
-    tenant.Tenant
+    tenant.TenantModel
     Name string
     Role string
 }
