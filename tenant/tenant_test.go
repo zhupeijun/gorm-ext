@@ -123,3 +123,16 @@ func TestSliceTypeModel(t *testing.T) {
 	db.Set(ContextKeyTenantID, uint(1)).Model([]User{}).Count(&count)
 	assert.Equal(t, int64(1), count)
 }
+
+func TestCreateMultipleRecord(t *testing.T) {
+	createUser()
+
+	db.Set(ContextKeyTenantID, uint(1)).Create(&[]User{
+		{Name: "Alice2", Role: "admin"},
+		{Name: "Alice2", Role: "admin"},
+	})
+
+	var count int64
+	db.Set(ContextKeyTenantID, uint(1)).Model(&User{}).Where("name", "Alice2").Count(&count)
+	assert.Equal(t, int64(2), count)
+}

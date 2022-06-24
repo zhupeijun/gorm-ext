@@ -1,10 +1,13 @@
 package tenant
 
 import (
+	"context"
 	"reflect"
+	"sync"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"gorm.io/gorm/schema"
 )
 
 type tenantInterface interface {
@@ -30,9 +33,32 @@ func isTargetModel(db *gorm.DB) bool {
 
 // assignTenantID set tenant id to model, model need to be pointer
 func assignTenantID(db *gorm.DB) {
-	if val, enabled := db.Statement.Model.(tenantInterface); enabled {
-		if tenantID, ok := getTenantID(db); ok {
+	modelSchema, err := schema.Parse(db.Statement.Model, &sync.Map{}, schema.NamingStrategy{})
+	if err != nil {
+		_ = db.AddError(err)
+		return
+	}
+
+	if tenantID, ok := getTenantID(db); ok {
+		if val, enabled := db.Statement.Model.(tenantInterface); enabled {
 			val.SetTenantID(tenantID)
+		} else {
+			// if it is pointer get the value of it
+			valueOfModel := reflect.ValueOf(db.Statement.Model)
+			if valueOfModel.Kind() == reflect.Pointer {
+				valueOfModel = reflect.Indirect(valueOfModel)
+			}
+
+			// if it is a slice, set value for each record
+			if valueOfModel.Kind() == reflect.Slice {
+				for i := 0; i < valueOfModel.Len(); i++ {
+					err = modelSchema.FieldsByDBName["tenant_id"].Set(context.Background(), valueOfModel.Index(i), tenantID)
+					if err != nil {
+						_ = db.AddError(err)
+						return
+					}
+				}
+			}
 		}
 	}
 }
