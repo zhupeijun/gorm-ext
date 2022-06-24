@@ -39,12 +39,17 @@ func assignTenantID(db *gorm.DB) {
 		return
 	}
 
+	field := modelSchema.FieldsByDBName["tenant_id"]
+	if field == nil {
+		return
+	}
+
 	if tenantID, ok := getTenantID(db); ok {
+		valueOfModel := reflect.ValueOf(db.Statement.Model)
 		if val, enabled := db.Statement.Model.(tenantInterface); enabled {
 			val.SetTenantID(tenantID)
 		} else {
 			// if it is pointer get the value of it
-			valueOfModel := reflect.ValueOf(db.Statement.Model)
 			if valueOfModel.Kind() == reflect.Pointer {
 				valueOfModel = reflect.Indirect(valueOfModel)
 			}
@@ -52,7 +57,7 @@ func assignTenantID(db *gorm.DB) {
 			// if it is a slice, set value for each record
 			if valueOfModel.Kind() == reflect.Slice {
 				for i := 0; i < valueOfModel.Len(); i++ {
-					err = modelSchema.FieldsByDBName["tenant_id"].Set(context.Background(), valueOfModel.Index(i), tenantID)
+					err = field.Set(context.Background(), valueOfModel.Index(i), tenantID)
 					if err != nil {
 						_ = db.AddError(err)
 						return

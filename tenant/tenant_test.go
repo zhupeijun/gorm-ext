@@ -17,6 +17,11 @@ type User struct {
 	Role string
 }
 
+type Department struct {
+	ID   uint `gorm:"primarykey"`
+	Name string
+}
+
 var db *gorm.DB
 
 func init() {
@@ -33,7 +38,7 @@ func init() {
 		panic(fmt.Sprintf("failed to register callback: %v", err))
 	}
 
-	err = db.AutoMigrate(&User{})
+	err = db.AutoMigrate(&User{}, &Department{})
 	if err != nil {
 		panic(fmt.Sprintf("failed auto migrate: %v", err))
 	}
@@ -135,4 +140,13 @@ func TestCreateMultipleRecord(t *testing.T) {
 	var count int64
 	db.Set(ContextKeyTenantID, uint(1)).Model(&User{}).Where("name", "Alice2").Count(&count)
 	assert.Equal(t, int64(2), count)
+}
+
+func TestNonTenantModel(t *testing.T) {
+	db.Unscoped().Where("1=1").Delete(&Department{})
+	db.Set(ContextKeyTenantID, uint(1)).Create(&[]Department{{Name: "admin"}})
+
+	var count int64
+	db.Set(ContextKeyTenantID, uint(1)).Model(&Department{}).Where("name", "admin").Count(&count)
+	assert.Equal(t, int64(1), count)
 }
